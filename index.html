@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FP Encrypter/Decrypter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a1a76; /* Deep Purple */
+            --secondary-color: #2c5282; /* Dark Blue */
+            --accent-color: #c9b0fd; /* Light Purple */
+            --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --text-color: #f0f0f0;
+            --shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            --border-radius: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            font-family: 'Montserrat', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Luxury background elements */
+        .luxury-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--accent-color);
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.1;
+            }
+            50% {
+                opacity: 0.2;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(20px);
+                opacity: 0.1;
+            }
+        }
+
+        header {
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            opacity: 0.9;
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(201, 176, 253, 0.3);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary-color), transparent);
+            z-index: -1;
+            border-radius: calc(var(--border-radius) + 2px);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 1.8rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1.2rem;
+            border: 1px solid rgba(74, 26, 118, 0.3);
+            border-radius: 10px;
+            resize: vertical;
+            min-height: 180px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.85);
+            color: #1a1a2e;
+            transition: var(--transition);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 26, 118, 0.2);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .encrypt-btn {
+            background: var(--primary-color);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .encrypt-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: var(--transition);
+        }
+
+        .encrypt-btn:hover::after {
+            left: 100%;
+        }
+
+        .decrypt-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .decrypt-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: var(--transition);
+        }
+
+        .decrypt-btn:hover::after {
+            left: 100%;
+        }
+
+        .copy-btn {
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .copy-btn:hover {
+            background: rgba(74, 26, 118, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .keypad-info {
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .help-section {
+            margin-top: 2.5rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(201, 176, 253, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .help-section h3 {
+            margin-bottom: 1.2rem;
+            color: var(--primary-color);
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+
+        .keypad-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.8rem;
+        }
+
+        .keypad-table th, .keypad-table td {
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid rgba(74, 26, 118, 0.2);
+            color: #000000; /* Changed text color to black */
+        }
+
+        .keypad-table th {
+            background: rgba(74, 26, 118, 0.1);
+            color: var(--primary-color);
+        }
+
+        .keypad-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .card {
+                padding: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Luxury background with animated particles -->
+    <div class="luxury-bg" id="particles"></div>
+
+    <header>
+        <h1>FP Encrypter/Decrypter</h1>
+        <p class="subtitle">Elegant Text Conversion with Vintage Keypad Mechanism</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="input-group">
+                <label for="inputText">Enter Text to Encrypt/Decrypt:</label>
+                <textarea id="inputText" placeholder="Type your message here..."></textarea>
+            </div>
+            
+            <div class="buttons">
+                <button class="encrypt-btn" id="encryptBtn">Encrypt</button>
+                <button class="decrypt-btn" id="decryptBtn">Decrypt</button>
+                <button class="copy-btn" id="copyBtn">Copy Result</button>
+            </div>
+            
+            <div class="input-group">
+                <label for="outputText">Result:</label>
+                <textarea id="outputText" readonly placeholder="Encrypted/Decrypted text will appear here..."></textarea>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h3>Keypad Mapping Guide</h3>
+            <p>Discover the elegant mapping of letters to vintage mobile keypad presses:</p>
+            <table class="keypad-table">
+                <tr>
+                    <th>Key</th>
+                    <th>Letters</th>
+                    <th>Presses</th>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>a, b, c</td>
+                    <td>1, 2, 3</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>d, e, f</td>
+                    <td>1, 2, 3</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>g, h, i</td>
+                    <td>1, 2, 3</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>j, k, l</td>
+                    <td>1, 2, 3</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>m, n, o</td>
+                    <td>1, 2, 3</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>p, q, r, s</td>
+                    <td>1, 2, 3, 4</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>t, u, v</td>
+                    <td>1, 2, 3</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>w, x, y, z</td>
+                    <td>1, 2, 3, 4</td>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>space</td>
+                    <td>1</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Create animated particles in the background
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 15;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size between 50px and 150px
+                const size = Math.random() * 100 + 50;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random position
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100 + 100; // Start below viewport
+                
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                
+                // Random animation delay
+                particle.style.animationDelay = `${Math.random() * 15}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Keypad mapping
+        const keypadMap = {
+            'a': { key: '2', presses: 1 },
+            'b': { key: '2', presses: 2 },
+            'c': { key: '2', presses: 3 },
+            'd': { key: '3', presses: 1 },
+            'e': { key: '3', presses: 2 },
+            'f': { key: '3', presses: 3 },
+            'g': { key: '4', presses: 1 },
+            'h': { key: '4', presses: 2 },
+            'i': { key: '4', presses: 3 },
+            'j': { key: '5', presses: 1 },
+            'k': { key: '5', presses: 2 },
+            'l': { key: '5', presses: 3 },
+            'm': { key: '6', presses: 1 },
+            'n': { key: '6', presses: 2 },
+            'o': { key: '6', presses: 3 },
+            'p': { key: '7', presses: 1 },
+            'q': { key: '7', presses: 2 },
+            'r': { key: '7', presses: 3 },
+            's': { key: '7', presses: 4 },
+            't': { key: '8', presses: 1 },
+            'u': { key: '8', presses: 2 },
+            'v': { key: '8', presses: 3 },
+            'w': { key: '9', presses: 1 },
+            'x': { key: '9', presses: 2 },
+            'y': { key: '9', presses: 3 },
+            'z': { key: '9', presses: 4 },
+            ' ': { key: '0', presses: 1 }
+        };
+
+        // Reverse mapping for decryption
+        const reverseMap = {};
+        Object.keys(keypadMap).forEach(char => {
+            const { key, presses } = keypadMap[char];
+            if (!reverseMap[key]) reverseMap[key] = {};
+            reverseMap[key][presses] = char;
+        });
+
+        // DOM elements
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const copyBtn = document.getElementById('copyBtn');
+
+        // Encryption function
+        function encrypt(text) {
+            text = text.toLowerCase();
+            return text.split('').map(char => {
+                if (keypadMap[char]) {
+                    return `${keypadMap[char].key}${keypadMap[char].presses}`;
+                }
+                return char; // Keep characters not in the map
+            }).join('');
+        }
+
+        // Decryption function
+        function decrypt(text) {
+            let result = '';
+            let i = 0;
+            
+            while (i < text.length) {
+                if (i + 1 < text.length && text[i] in reverseMap) {
+                    const key = text[i];
+                    const presses = parseInt(text[i + 1]);
+                    
+                    if (!isNaN(presses) && reverseMap[key][presses]) {
+                        result += reverseMap[key][presses];
+                        i += 2;
+                        continue;
+                    }
+                }
+                
+                result += text[i];
+                i++;
+            }
+            
+            return result;
+        }
+
+        // Event listeners
+        encryptBtn.addEventListener('click', () => {
+            const encryptedText = encrypt(inputText.value);
+            outputText.value = encryptedText;
+        });
+
+        decryptBtn.addEventListener('click', () => {
+            const decryptedText = decrypt(inputText.value);
+            outputText.value = decryptedText;
+        });
+
+        copyBtn.addEventListener('click', () => {
+            outputText.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
+        });
+
+        // Initialize particles when page loads
+        window.addEventListener('load', createParticles);
+    </script>
+</body>
+</html>
